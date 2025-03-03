@@ -52,7 +52,32 @@ if st.button('Predict Probabilities'):
                             'crr':[crr], 
                             'rrr':[rrr]
                             })
-    result = model.predict_proba(input_df)
+    #result = model.predict_proba(input_df)
+    import pandas as pd
+
+# Ensure input_df is correctly formatted before passing to model
+input_df = pd.DataFrame({
+    'batting_team': [batting_team], 
+    'bowling_team': [bowling_team],
+    'overs': [overs],
+    'runs': [runs],
+    'wickets': [wickets],
+    'target': [target],
+    'crr': [crr],
+    'rrr': [rrr]
+})
+
+# Ensure the data structure is compatible with the pipeline
+try:
+    transformed_input = model.steps[0][1].transform(input_df)  # Preprocessing step
+    result = model.steps[-1][1].predict_proba(transformed_input)  # Prediction step
+    
+    loss = result[0][0]
+    win = result[0][1]
+    st.header(f"{batting_team} - {round(win * 100)}%")
+except Exception as e:
+    st.error(f"Error in model processing: {e}")
+
     loss = result[0][0]
     win = result[0][1]
     st.header(batting_team + " - " + str(round(win*100)) + "%")
